@@ -1,1 +1,2 @@
-# function_composition
+# function_composition 
+in order to  run this go  to terminal  and type "python3 aq-funccompt-skeleton.py" this will run the program and send the  current question to test_html_write.html. If you then open/refresh test_html_write the question will  have populated. There may be a couple issues the first time with locations as I was just doing this all from my  desktop.  SO if it doesnt work trying either navigating into the folder  from terminal  or copying it to desktop or honeslt im not sure. Im not that fmailiar with git  so bear with me and lmk if  you have any questions. 
