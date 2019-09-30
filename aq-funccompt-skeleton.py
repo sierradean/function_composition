@@ -2,6 +2,29 @@ import random
 import math
 from string import Template
 
+
+class function_composition(object):
+	"""
+	Summary: function composition object that 
+	organizes our logic
+
+	Parameters:
+	string path: path to directory to write file
+
+	string file_name: file name to write the final results to
+
+	string function_list: a list of function objects to pick from
+
+	
+	"""
+	def __init__(self, path, file_name, function_list, num_functions):
+		self.path = path
+		self.file_name = file_name
+		self.function_list = function_list
+		self.num_functions = num_functions
+
+
+
 #right now this always assumes there will be one exponential and  two linear  fns
 #this is the  way it  is in the example problem
 #this can probably be abstracted more but I just started off like this 
