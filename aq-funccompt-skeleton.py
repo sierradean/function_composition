@@ -13,15 +13,55 @@ class function_composition(object):
 
 	string file_name: file name to write the final results to
 
-	string function_list: a list of function objects to pick from
+	simple_func function_list: a list of simple_func objects to pick from
 
+	int num_functions: number of functions to pick from function_list
+						if num_functions > len(function_list) that means
+						repetition is allowed
 	
+	int num_choices: number of choices to present to the user
+
+	bool allow_repetition: whether to allow picking the same function from
+						function_list more than once
 	"""
-	def __init__(self, path, file_name, function_list, num_functions):
+	def __init__(self, path, file_name, function_list, num_functions, num_choices, allow_repetition=False):
 		self.path = path
 		self.file_name = file_name
 		self.function_list = function_list
 		self.num_functions = num_functions
+
+
+
+
+
+
+class simple_func(object):
+	"""
+	Summary: a simple function that takes in one parameter and
+			does a single function
+
+	Parameters:
+	string name: name of function e.g. F, G, W etc.
+
+	string arg_name: name of input e.g. x, y, z
+
+	string operation: a single operation e.g. '+', '-', '*' etc
+
+	int/float number: a single number, either integer or float
+	"""
+
+	# operations that require paratheses when enclosed in another function
+	# 	e.g. if F(x) = x + 1, G(x) = x^2. Then F(G(x)) = (x + 1)^2 
+	#	where x + 1 needs to be enclosed in paratheses
+	need_enclose_ops = ('+', '-')
+
+	def __init__(self, name, arg_name, operation, number):
+		self.name = name
+		self.arg_name = arg_name
+		self.operation = operation
+		self.number = number 
+		self.need_enclosure = self.operation in self.need_enclose_ops
+		
 
 
 
