@@ -1,5 +1,6 @@
 import random
 import math
+import os
 from string import Template
 
 
@@ -24,14 +25,47 @@ class function_composition(object):
 	bool allow_repetition: whether to allow picking the same function from
 						function_list more than once
 	"""
-	def __init__(self, path, file_name, function_list, num_functions, num_choices, allow_repetition=False):
+	def __init__(self, path, file_name, function_list, num_functions, 
+			num_choices, allow_repetition=False):
+		assert num_functions > 0
+		assert num_choices > 1
 		self.path = path
 		self.file_name = file_name
 		self.function_list = function_list
 		self.num_functions = num_functions
+		self.choices = num_choices
+		self.allow_repetition = allow_repetition
 
+		file_path = os.path.join(path, file_name)
+		try:
+			self.file = open(file_path, 'w+')
+		except OSError:
+			self.file = None
+			print(f"Cannot open: {file_path} to output file")
+			return
+	
+	def __del__(self):
+		if self.file:
+			self.file.close()
+	
+	def __pick_func(self):
+		if self.allow_repetition:
+			return random.choices(self.function_list, k=self.num_functions)
+		return random.sample(self.function_list, k=self.num_functions)
 
-
+	@staticmethod
+	def simple_func_str(fn_list):
+		so_far = fn_list[-1].function_str
+		for i in range(len(fn_list) - 2, -1, -1):
+			so_far = fn_list[i].function_concat_str(so_far)
+		return so_far
+	
+	@staticmethod
+	def func_expression_str(fn_list):
+		so_far = fn_list[-1].function_expr
+		for i in range(len(fn_list) - 2, -1, -1):
+			so_far = fn_list[i].function_concat_expr(fn_list[i + 1])
+		return so_far
 
 
 
@@ -45,7 +79,7 @@ class simple_func(object):
 
 	string arg_name: name of input e.g. x, y, z
 
-	string operation: a single operation e.g. '+', '-', '*' etc
+	string operation: a single operation e.g. '+', '-', '*', '^' etc
 
 	int/float number: a single number, either integer or float
 	"""
@@ -53,15 +87,42 @@ class simple_func(object):
 	# operations that require paratheses when enclosed in another function
 	# 	e.g. if F(x) = x + 1, G(x) = x^2. Then F(G(x)) = (x + 1)^2 
 	#	where x + 1 needs to be enclosed in paratheses
-	need_enclose_ops = ('+', '-')
+	__need_enclose_ops = ('+', '-')
+
+	__simple_ops = ('+', '-', '*', '^', '%')
 
 	def __init__(self, name, arg_name, operation, number):
 		self.name = name
 		self.arg_name = arg_name
 		self.operation = operation
 		self.number = number 
-		self.need_enclosure = self.operation in self.need_enclose_ops
+		self.need_enclosure = self.operation in self.__need_enclose_ops
+		self.function_str = f"{self.name}({self.arg_name})"
+		self.function_expr = self.__function_expr(arg_name, operation, number)
 		
+	def function_concat_str(self, param):
+		return f"{self.name}({param})"
+
+
+	def function_concat_expr(self, nest_fn):
+		if nest_fn.need_enclosure:
+			new_arg = f"({nest_fn.function_expr})"
+		else:
+			new_arg = nest_fn.function_expr
+		return self.__function_expr(new_arg, self.operation, self.number)
+
+
+	def __function_expr(self, arg_name, operation, number):
+		if operation in self.__simple_ops:
+			return f"{name}{operation}{number}"
+		elif number is None and arg_name is None:
+			return f"{operation}()"
+		elif number is None:
+			return f"{operation}({arg_name})"
+		elif arg_name is None:
+			return f"{operation}({number})"
+		else:
+			raise RuntimeError("simple_func class does not support complex functions")
 
 
 
