@@ -39,7 +39,7 @@ class TestFunctionComposition(unittest.TestCase):
         Composer = function_composition(self.fn_list)
         # for high confidence, we run this 100 times
         for i in range(100):
-            ans_list, ans_pos, choices = Composer.generate(3, 5)
+            ans_list, ans_pos, choices = Composer.generate(3, 5)[0]
             choices_str = [function_composition.func_str(l) for l in choices]
             self.assertTrue(len(set(choices_str)) == len(choices_str))
             self.assertEqual(function_composition.func_str(choices[ans_pos]), 
