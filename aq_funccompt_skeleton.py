@@ -1,7 +1,7 @@
 import random
 import math
 import os
-import itertools
+import sys
 from string import Template
 
 
@@ -18,21 +18,6 @@ class function_composition(object):
 	def __init__(self, file, function_list):
 		self.file = file
 		self.function_list = function_list
-
-		# file_path = os.path.join(path, file_name)
-		# try:
-		# 	self.file = open(file_path, 'w+')
-		# except OSError:
-		# 	self.file = None
-		# 	print(f"Cannot open: {file_path} to output file")
-		# 	return
-	
-	# def __del__(self):
-	# 	"""
-	# 	clean up when an instance dies
-	# 	"""
-	# 	if self.file:
-	# 		self.file.close()
 	
 	def __pick_func(self, num_functions, allow_repetition=False):
 		if allow_repetition:
@@ -160,7 +145,24 @@ class simple_func(object):
 			new_arg = nest_fn.function_expr
 		return self.concat_expr(new_arg)
 
+def main():
+	file_path = sys.argv[1]
 
+	file_path = os.path.join(file_path)
+	try:
+		fp = open(file_path, 'w+')
+	except OSError:
+		fp = None
+		print(f"Cannot open: {file_path} to output file")
+		return
+	
+	# look into eval() that seems to parse functions for us
+	# fp.close()
+
+
+
+if __name__ == '__main__':
+	main()
 
 #right now this always assumes there will be one exponential and  two linear  fns
 #this is the  way it  is in the example problem
