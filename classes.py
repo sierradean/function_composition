@@ -9,12 +9,9 @@ class function_composition(object):
 	organizes our logic
 
 	Parameters:
-	file object: a file object that can be written to
-
 	simple_func function_list: a list of simple_func objects to pick from
 	"""
-	def __init__(self, file, function_list):
-		self.file = file
+	def __init__(self, function_list):
 		self.function_list = function_list
 	
 	def __rand_pick_func(self, num_functions, allow_repetition=False):
@@ -141,5 +138,16 @@ class simple_func(object):
 		return self.concat_expr(new_arg)
 
 
+class file_writer(object):
 
+	template_start = '<html><head><script type="">'
+	template_js=	'var form = document.querySelector("form");var log = document.querySelector("#log"); form.addEventListener("submit", function(event) {var data = new FormData(form); var output = "";for (const entry of data) {output = output + entry[0] + "=" + entry[1] + "\r"};log.innerText = output;event.preventDefault();}, false)</script></head>'
+	template_body = '<body><p>If we were given three functions: </p ><p style="text-align: center"> {0} </p> <p>... and you wanted to calculate:</p><p style="text-align: center"> {1} </p> <p>...how would you compse the <a></a> functions to get that? (select ONE)</p>'
+	template_form =	'<form><div><input type="radio" id="funcComp1"name="funcComp" value="a"><label for="funcComp1">{0}</label><input type="radio" id="funcComp2"name="funcComp" value="b"><label for="funcComp2">{1}</label><input type="radio" id="funcComp3"name="funcComp" value="c"><label for="funcComp3">{2}</label><input type="radio" id="funcComp4"name="funcComp" value="d"><label for="funcComp4">{3}</label><input type="radio" id="funcComp5"name="funcComp" value="e"><label for="funcComp5">{4}</label></div></form>'
+	template_submit = '<pre id="log"></pre><button>Submit</button>'
+	template_end = '</body></html>'
 
+	def __init(self, file, fn_comp):
+		self.file = file
+
+	

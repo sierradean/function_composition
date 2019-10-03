@@ -35,8 +35,8 @@ class TestFunctionComposition(unittest.TestCase):
         self.assertEqual(x, '(x ^ 2) * 7 + 8')
 
     def test_function_comp_generate(self):
-        fp = tempfile.TemporaryFile()
-        Composer = function_composition(fp, self.fn_list)
+
+        Composer = function_composition(self.fn_list)
         # for high confidence, we run this 100 times
         for i in range(100):
             ans_list, ans_pos, choices = Composer.generate(3, 5)
@@ -44,7 +44,7 @@ class TestFunctionComposition(unittest.TestCase):
             self.assertTrue(len(set(choices_str)) == len(choices_str))
             self.assertEqual(function_composition.func_str(choices[ans_pos]), 
                         function_composition.func_str(ans_list))
-        fp.close()
+
 
 if __name__ == '__main__':
     unittest.main()
