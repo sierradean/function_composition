@@ -1,6 +1,7 @@
 import random
 import math
 import os
+import itertools
 from string import Template
 
 
@@ -10,51 +11,39 @@ class function_composition(object):
 	organizes our logic
 
 	Parameters:
-	string path: path to directory to write file
-
-	string file_name: file name to write the final results to
+	file object: a file object that can be written to
 
 	simple_func function_list: a list of simple_func objects to pick from
-
-	int num_functions: number of functions to pick from function_list
-						if num_functions > len(function_list) that means
-						repetition is allowed
-	
-	int num_choices: number of choices to present to the user
-
-	bool allow_repetition: whether to allow picking the same function from
-						function_list more than once
 	"""
-	def __init__(self, path, file_name, function_list, num_functions, 
-			num_choices, allow_repetition=False):
-		assert num_functions > 0
-		assert num_choices > 1
-		self.path = path
-		self.file_name = file_name
+	def __init__(self, file, function_list):
+		self.file = file
 		self.function_list = function_list
-		self.num_functions = num_functions
-		self.choices = num_choices
-		self.allow_repetition = allow_repetition
 
-		file_path = os.path.join(path, file_name)
-		try:
-			self.file = open(file_path, 'w+')
-		except OSError:
-			self.file = None
-			print(f"Cannot open: {file_path} to output file")
-			return
+		# file_path = os.path.join(path, file_name)
+		# try:
+		# 	self.file = open(file_path, 'w+')
+		# except OSError:
+		# 	self.file = None
+		# 	print(f"Cannot open: {file_path} to output file")
+		# 	return
 	
-	def __del__(self):
-		if self.file:
-			self.file.close()
+	# def __del__(self):
+	# 	"""
+	# 	clean up when an instance dies
+	# 	"""
+	# 	if self.file:
+	# 		self.file.close()
 	
-	def __pick_func(self):
-		if self.allow_repetition:
-			return random.choices(self.function_list, k=self.num_functions)
-		return random.sample(self.function_list, k=self.num_functions)
+	def __pick_func(self, num_functions, allow_repetition=False):
+		if allow_repetition:
+			return random.choices(self.function_list, k=num_functions)
+		return random.sample(self.function_list, k=num_functions)
 
 	@staticmethod
 	def simple_func_str(fn_list):
+		"""
+		outputs the function string like F(H(x)) 
+		"""
 		so_far = fn_list[-1].function_str
 		for i in range(len(fn_list) - 2, -1, -1):
 			so_far = fn_list[i].concat_str(so_far)
@@ -62,11 +51,58 @@ class function_composition(object):
 	
 	@staticmethod
 	def func_expression_str(fn_list):
+		"""
+		outputs the function expression like: (x - 1) * 2
+		"""
 		so_far = fn_list[-1].function_expr
 		for i in range(len(fn_list) - 2, -1, -1):
-			so_far = fn_list[i].concat_expr(fn_list[i + 1])
+			if fn_list[i + 1].need_enclosure:
+				so_far = f"({so_far})"
+			so_far = fn_list[i].concat_expr(so_far)
 		return so_far
 
+	def generate(self, num_functions, num_choices):
+		"""
+		generate our question
+
+		Parameters:
+		int num_functions: number of functions to choose from
+			if num_functions > len(number of given functions)
+			repetition will occur
+		
+		int num_choices: number of choices to generate. Exactly one of these
+			choices is correct.
+		
+		Returns:
+		function name string, function expression, index of correct answer, choices list
+		"""
+		assert 1 < num_functions
+		assert 1 < num_choices and num_choices < math.factorial(len(self.function_list))
+
+		fn_list = self.__pick_func(num_functions, num_functions > len(self.function_list))
+		existing_fn = set()
+
+		ans = fn_list[:]
+		random.shuffle(ans)
+		ans_func_str = self.simple_func_str(fn_list) # e.g. F(H(x))
+		ans_expr = self.func_expression_str(fn_list) # e.g. x * 2 + 7
+		existing_fn.add(ans_func_str)
+
+		choices = [None] * num_choices
+		ans_pos = random.randint(0, num_choices - 1)
+		choices[ans_pos] = ans_func_str
+		
+		for i in range(0, num_choices):
+			if i != ans_pos:
+				while True:
+					c = fn_list[:]
+					random.shuffle(c)
+					c_str = self.simple_func_str(c)
+					if c_str != ans_func_str and c_str not in existing_fn:
+						choices[i] = c_str
+						existing_fn.add(c_str)
+						break
+		return ans_func_str, ans_expr, ans_pos, choices
 
 
 class simple_func(object):
@@ -87,7 +123,7 @@ class simple_func(object):
 	# operations that require paratheses when enclosed in another function
 	# 	e.g. if F(x) = x + 1, G(x) = x^2. Then F(G(x)) = (x + 1)^2 
 	#	where x + 1 needs to be enclosed in paratheses
-	__need_enclose_ops = ('+', '-')
+	__need_enclose_ops = ('+', '-', '^')
 
 	__simple_ops = ('+', '-', '*', '^', '%')
 
@@ -98,31 +134,31 @@ class simple_func(object):
 		self.number = number 
 		self.need_enclosure = self.operation in self.__need_enclose_ops
 		self.function_str = f"{self.name}({self.arg_name})"
-		self.function_expr = self.__function_expr(arg_name, operation, number)
+		self.function_expr = self.concat_expr(arg_name)
 		
 	def concat_str(self, param):
 		return f"{self.name}({param})"
 
 
-	def concat_expr(self, nest_fn):
+	def concat_expr(self, nested_expr):
+		if self.operation in self.__simple_ops:
+			return f"{nested_expr} {self.operation} {self.number}"
+		elif self.number is None and nested_expr is None:
+			return f"{self.operation}()"
+		elif self.number is None:
+			return f"{self.operation}({nested_expr})"
+		elif nested_expr is None:
+			return f"{self.operation}({self.number})"
+		else:
+			raise RuntimeError("simple_func class does not support complex functions")
+
+
+	def concat_fn(self, nest_fn):
 		if nest_fn.need_enclosure:
 			new_arg = f"({nest_fn.function_expr})"
 		else:
 			new_arg = nest_fn.function_expr
-		return self.__function_expr(new_arg, self.operation, self.number)
-
-
-	def __function_expr(self, arg_name, operation, number):
-		if operation in self.__simple_ops:
-			return f"{arg_name} {operation} {number}"
-		elif number is None and arg_name is None:
-			return f"{operation}()"
-		elif number is None:
-			return f"{operation}({arg_name})"
-		elif arg_name is None:
-			return f"{operation}({number})"
-		else:
-			raise RuntimeError("simple_func class does not support complex functions")
+		return self.concat_expr(new_arg)
 
 
 
