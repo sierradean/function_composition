@@ -57,14 +57,14 @@ class function_composition(object):
 	def simple_func_str(fn_list):
 		so_far = fn_list[-1].function_str
 		for i in range(len(fn_list) - 2, -1, -1):
-			so_far = fn_list[i].function_concat_str(so_far)
+			so_far = fn_list[i].concat_str(so_far)
 		return so_far
 	
 	@staticmethod
 	def func_expression_str(fn_list):
 		so_far = fn_list[-1].function_expr
 		for i in range(len(fn_list) - 2, -1, -1):
-			so_far = fn_list[i].function_concat_expr(fn_list[i + 1])
+			so_far = fn_list[i].concat_expr(fn_list[i + 1])
 		return so_far
 
 
@@ -100,11 +100,11 @@ class simple_func(object):
 		self.function_str = f"{self.name}({self.arg_name})"
 		self.function_expr = self.__function_expr(arg_name, operation, number)
 		
-	def function_concat_str(self, param):
+	def concat_str(self, param):
 		return f"{self.name}({param})"
 
 
-	def function_concat_expr(self, nest_fn):
+	def concat_expr(self, nest_fn):
 		if nest_fn.need_enclosure:
 			new_arg = f"({nest_fn.function_expr})"
 		else:
@@ -114,7 +114,7 @@ class simple_func(object):
 
 	def __function_expr(self, arg_name, operation, number):
 		if operation in self.__simple_ops:
-			return f"{name}{operation}{number}"
+			return f"{arg_name} {operation} {number}"
 		elif number is None and arg_name is None:
 			return f"{operation}()"
 		elif number is None:
@@ -209,11 +209,11 @@ template_submit = '<pre id="log"></pre><button>Submit</button>'
 template_end = '</body></html>'
 
 #calls create_sols
-sols = create_solns(ordered_fns)
+# sols = create_solns(ordered_fns)
 
 #writes all the html to an external HTML file that can then be opened to view in browser
 #subsitutes all py values into templates given above as well
-html_file.writelines( [template_start, template_js, template_body.format(blank_1, substitue(ordered_fns)), template_form.format(sols[0], sols[1], sols[2], sols[3], sols[4]), template_submit,template_end] )
+# html_file.writelines( [template_start, template_js, template_body.format(blank_1, substitue(ordered_fns)), template_form.format(sols[0], sols[1], sols[2], sols[3], sols[4]), template_submit,template_end] )
 
 
 
