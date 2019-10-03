@@ -1,7 +1,7 @@
 import unittest
 import tempfile
 
-from aq_funccompt_skeleton import *
+from classes import *
 
 class TestFunctionComposition(unittest.TestCase):
 
@@ -28,7 +28,7 @@ class TestFunctionComposition(unittest.TestCase):
         self.assertEqual(self.f2.concat_fn(self.f1), '(x + 8) * 7')
 
     def test_function_composition(self):
-        s = function_composition.simple_func_str(self.fn_list)
+        s = function_composition.func_str(self.fn_list)
         self.assertEqual(s, 'F(G(H(x)))')
 
         x = function_composition.func_expression_str(self.fn_list)
@@ -39,9 +39,11 @@ class TestFunctionComposition(unittest.TestCase):
         Composer = function_composition(fp, self.fn_list)
         # for high confidence, we run this 100 times
         for i in range(100):
-            s, x, i, c = Composer.generate(3, 5)
-            self.assertTrue(len(set(c)) == len(c))
-            self.assertEqual(c[i], s)
+            ans_list, ans_pos, choices = Composer.generate(3, 5)
+            choices_str = [function_composition.func_str(l) for l in choices]
+            self.assertTrue(len(set(choices_str)) == len(choices_str))
+            self.assertEqual(function_composition.func_str(choices[ans_pos]), 
+                        function_composition.func_str(ans_list))
         fp.close()
 
 if __name__ == '__main__':
