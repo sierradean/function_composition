@@ -156,6 +156,21 @@ class simple_func(object):
 
 
 class file_writer(object):
+	"""
+	Summary:
+	Generalized writer object to construct html outputs
+
+	Parameters:
+	File Object file: an opened python file object to dump the output
+
+	function_composition fn_comp: a function composition object that generates the questions
+
+	int num_functions: number of functions to use
+
+	int num_choices: number of choices to have 
+
+	int num_questions=1: number of questions to generate
+	"""
 
 	template_start = '<html><head><script type="">'
 	template_js=	'var form = document.querySelector("form");var log = document.querySelector("#log"); form.addEventListener("submit", function(event) {var data = new FormData(form); var output = "";for (const entry of data) {output = output + entry[0] + "=" + entry[1] + "\r"};log.innerText = output;event.preventDefault();}, false)</script></head>'
