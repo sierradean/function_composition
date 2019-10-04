@@ -173,19 +173,19 @@ class file_writer(object):
 	int num_choices: number of choices to have 
 
 	int num_questions=1: number of questions to generate
+
+	bool body_only=False: do not include html <html>, <heads>, etc headers in output 
 	"""
 
 	template_start = '<html><head><script type="">'
-	template_js=	'var form = document.querySelector("form");var log = document.querySelector("#log"); form.addEventListener("submit", function(event) {var data = new FormData(form); var output = "";for (const entry of data) {output = output + entry[0] + "=" + entry[1] + "\r"};log.innerText = output;event.preventDefault();}, false)</script></head>'
+	template_js=	'var form = document.querySelector("form");var log = document.querySelector("#log"); form.addEventListener("submit", function(event) {var data = new FormData(form); var output = "";for (const entry of data) {output = output + entry[0] + "=" + entry[1] + "\r"};log.innerText = output;event.preventDefault();}, false)</script></head><body>'
 	
 	template_body = '''\
-		<body>
-			<p>If we were given {0} functions: </p>
-			<p style="text-align: center"> {1} </p> 
-			<p>... and you wanted to calculate:</p>
-			<p style="text-align: center"> {2} </p> 
-			<p>...how would you compose the functions to get that? (select ONE)</p>
-		</body>
+		<p>If we were given {0} functions: </p>
+		<p style="text-align: center"> {1} </p> 
+		<p>... and you wanted to calculate:</p>
+		<p style="text-align: center"> {2} </p> 
+		<p>...how would you compose the functions to get that? (select ONE)</p>
 	'''
 
 	template_form =	'''\
@@ -209,19 +209,21 @@ class file_writer(object):
 
 	template_end = '</body></html>\n'
 
-	def __init__(self, file, fn_comp, num_functions, num_choices, num_questions=1):
+	def __init__(self, file, fn_comp, num_functions, num_choices, num_questions=1, body_only=False):
 		self.file = file
 		self.fn_comp = fn_comp
 		self.num_functions = num_functions
 		self.num_choices = num_choices
 		self.num_questions = num_questions
+		self.body_only = body_only
 
 	def dump(self):
 		"""
 		creates html contents and dumps to file
 		"""
-		self.file.write(template_start)
-		self.file.write(template_js)
+		if not self.body_only:
+			self.file.write(template_start)
+			self.file.write(template_js)
 		generated_questions = self.fn_comp.generate(self.num_function, self.num_choices, self.num_questions)
 		for i in range(len(generated_questions)):
 			ans_list, ans_pos, choices = generated_questions[i]
@@ -231,4 +233,5 @@ class file_writer(object):
 			form += "".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="a"><label for="funcComp1">{function_composition.func_str(choices[j])}</label>' for j in range(len(choices))])
 			form += "</div></form>"
 			self.file.write([template_body, form, self.template_submit, self.hr])
-		self.file.write(self.template_end)
+		if not self.body_only:
+			self.file.write(self.template_end)
