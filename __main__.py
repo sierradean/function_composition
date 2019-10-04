@@ -6,19 +6,20 @@ import textwrap
 from classes import *
 
 #------------------------ Flags ----------------------------
-
+def parse_args():
+    parser = argparse.ArgumentParser(description='Process function composition program')
+    parser.add_argument('-o', "--outs", type=argparse.FileType('w+', encoding='UTF-8'), help='Path to file for output, create file if necessary. Default output is stdout.')
+    parser.add_argument('-num_functions', type=int, default=3, help='number of functions to have as answer, must be at least 1. Default 3')
+    parser.add_argument('-num_choices', type=int, default=5, help='number of choices to present to the user, 1 < num choice <= factorial(num functions). Default 5')
+    parser.add_argument('-q', '--questions', type=int, default=1, help='number of questions to generate in file, default is 1. Must be no greater than factorial(num functions)')
+    return parser.parse_args(), parser
 
 #------------------------ Functions ------------------------
 
 
 #------------------------ Main -----------------------------
 def main():
-    parser = argparse.ArgumentParser(description='Process function composition program')
-    parser.add_argument('-o', "--outs", type=argparse.FileType('w+', encoding='UTF-8'), help='Path to file for output, create file if necessary. Default output is stdout.')
-    parser.add_argument('-num_functions', type=int, default=3, help='number of functions to have as answer, must be at least 1. Default 3')
-    parser.add_argument('-num_choices', type=int, default=5, help='number of choices to present to the user, 1 < num choice <= factorial(num functions). Default 5')
-    parser.add_argument('-q', '--questions', type=int, default=1, help='number of questions to generate in file, default is 1. Must be no greater than factorial(num functions)')
-    args = parser.parse_args()
+    args, parser = parse_args()
 
     if args.num_functions < 1 or args.questions < 1:
         help_and_exit(parser)
