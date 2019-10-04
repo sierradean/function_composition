@@ -12,6 +12,7 @@ class function_composition(object):
 	simple_func function_list: a list of simple_func objects to pick from
 	"""
 	def __init__(self, function_list):
+		assert function_list and len(function_list) > 0
 		self.function_list = function_list
 	
 	def __rand_pick_func(self, num_functions, allow_repetition=False):
@@ -90,7 +91,7 @@ class function_composition(object):
 						c = ans_list[:]
 						random.shuffle(c)
 						c_str = self.func_str(c)
-						if c_str != ans_func_str and c_str not in existing_fn:
+						if c_str not in existing_fn:
 							choices[i] = c
 							existing_fn.add(c_str)
 							break
@@ -119,7 +120,7 @@ class simple_func(object):
 	#	where x + 1 needs to be enclosed in paratheses
 	__need_enclose_ops = ('+', '-', '^')
 
-	__simple_ops = ('+', '-', '*', '^', '%')
+	simple_ops = ('+', '-', '*', '/', '^', '%')
 
 	def __init__(self, name, arg_name, operation, number):
 		self.name = name
@@ -138,7 +139,7 @@ class simple_func(object):
 
 
 	def concat_expr(self, nested_expr):
-		if self.operation in self.__simple_ops:
+		if self.operation in self.simple_ops:
 			return f"{nested_expr} {self.operation} {self.number}"
 		elif self.number is None and nested_expr is None:
 			return f"{self.operation}()"
@@ -157,6 +158,8 @@ class simple_func(object):
 			new_arg = nest_fn.function_expr
 		return self.concat_expr(new_arg)
 
+	def __repr__(self):
+	 return f"{self.function_str} = {self.function_expr}"
 
 class file_writer(object):
 	"""
@@ -222,16 +225,19 @@ class file_writer(object):
 		creates html contents and dumps to file
 		"""
 		if not self.body_only:
-			self.file.write(template_start)
-			self.file.write(template_js)
-		generated_questions = self.fn_comp.generate(self.num_function, self.num_choices, self.num_questions)
+			self.file.write(self.template_start)
+			self.file.write(self.template_js)
+		generated_questions = self.fn_comp.generate(self.num_functions, self.num_choices, self.num_questions)
 		for i in range(len(generated_questions)):
 			ans_list, ans_pos, choices = generated_questions[i]
-			fn_body = ", ".join([f.function_str_expr_html for f in random.shuffle(ans_list[:])])
-			template_body = template_body.format(self.num_functions, fn_body, function_composition.func_expression_str(ans_list))
+			ans_list_copy = ans_list[:]
+			random.shuffle(ans_list_copy)
+			fn_body = ", ".join([f.function_str_expr_html for f in ans_list_copy])
+			template_body = self.template_body.format(self.num_functions, fn_body, function_composition.func_expression_str(ans_list))
 			form = "<form><div>"
 			form += "".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="a"><label for="funcComp1">{function_composition.func_str(choices[j])}</label>' for j in range(len(choices))])
 			form += "</div></form>"
-			self.file.write([template_body, form, self.template_submit, self.hr])
+			self.file.write(template_body)
+			self.file.write("".join([template_body, form, self.template_submit, self.hr]))
 		if not self.body_only:
 			self.file.write(self.template_end)
