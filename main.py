@@ -5,14 +5,19 @@ import textwrap
 
 from classes import *
 
+#------------------------ Flags ----------------------------
 parser = argparse.ArgumentParser(description='Process function composition program')
 parser.add_argument('path', type=str, help='Absolute path to output html file')
 parser.add_argument('name', type=str, help='file name to output content, create file if necessary (recommend .html)')
-parser.add_argument('num_functions', type=int, help='number of functions to have as answer, must be at least 1')
-parser.add_argument('num_choices', type=int, help='number of choices to present to the user, 1 < num choice <= factorial(num functions)')
+parser.add_argument('-num_functions', type=int, default=3, help='number of functions to have as answer, must be at least 1. Default 3')
+parser.add_argument('-num_choices', type=int, default=5, help='number of choices to present to the user, 1 < num choice <= factorial(num functions). Default 5')
 parser.add_argument('-q', '--questions', type=int, default=1, help='number of questions to generate in file, default is 1. Must be no greater than factorial(num functions)')
 args = parser.parse_args()
 
+#------------------------ Functions ------------------------
+
+
+#------------------------ Main -----------------------------
 def main():
     if args.num_functions < 1 or args.questions < 1:
         help_and_exit()
@@ -32,9 +37,9 @@ def main():
         print(f"Cannot output file to {file_path}")
         exit(1)
 	
-    composer = function_composition(fn_list) # TODO: create a functions list
-    writer = file_writer(fp, composer, args.num_functions, args.num_choices, args.questions)
-    writer.dump()
+    # composer = function_composition(fn_list) # TODO: create a functions list
+    # writer = file_writer(fp, composer, args.num_functions, args.num_choices, args.questions)
+    # writer.dump()
     fp.close()
     exit(0)
 

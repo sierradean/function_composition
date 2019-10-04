@@ -129,8 +129,11 @@ class simple_func(object):
 		self.need_enclosure = self.operation in self.__need_enclose_ops
 		self.function_str = f"{self.name}({self.arg_name})"
 		self.function_expr = self.concat_expr(arg_name)
+		self.function_str_expr_html = f"<strong>{self.function_str} = {self.function_expr}</strong>"
 		
-	def concat_str(self, param):
+	def concat_str(self, param, html=False):
+		if html:
+			return f"<strong>{self.name}({param})</strong>"
 		return f"{self.name}({param})"
 
 
@@ -202,6 +205,8 @@ class file_writer(object):
 		</form>
 	'''
 	template_submit = '<pre id="log"></pre><button>Submit</button>'
+	hr = '<hr>'
+
 	template_end = '</body></html>\n'
 
 	def __init__(self, file, fn_comp, num_functions, num_choices, num_questions=1):
@@ -215,7 +220,15 @@ class file_writer(object):
 		"""
 		creates html contents and dumps to file
 		"""
+		self.file.write(template_start)
+		self.file.write(template_js)
 		generated_questions = self.fn_comp.generate(self.num_function, self.num_choices, self.num_questions)
 		for i in range(len(generated_questions)):
 			ans_list, ans_pos, choices = generated_questions[i]
-	
+			fn_body = ", ".join([f.function_str_expr_html for f in random.shuffle(ans_list[:])])
+			template_body = template_body.format(self.num_functions, fn_body, function_composition.func_expression_str(ans_list))
+			form = "<form><div>"
+			form += "".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="a"><label for="funcComp1">{function_composition.func_str(choices[j])}</label>' for j in range(len(choices))])
+			form += "</div></form>"
+			self.file.write([template_body, form, self.template_submit, self.hr])
+		self.file.write(self.template_end)
