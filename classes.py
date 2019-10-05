@@ -15,9 +15,8 @@ class function_composition(object):
 		assert function_list and len(function_list) > 0
 		self.function_list = function_list
 	
-	def __rand_pick_func(self, num_functions, allow_repetition=False):
-		if allow_repetition:
-			return random.choices(self.function_list, k=num_functions)
+	def __rand_pick_func(self, num_functions):
+		assert num_functions <= len(self.function_list)
 		return random.sample(self.function_list, k=num_functions)
 
 	@staticmethod
@@ -60,6 +59,7 @@ class function_composition(object):
 		num_questions len list of
 		[answer functions list, index of correct answer, choices (list of functions list)]
 		"""
+		assert num_functions <= len(self.function_list)
 		assert 1 <= num_functions
 		assert 1 < num_choices and num_choices <= math.factorial(len(self.function_list))
 		assert 1 <= num_questions and num_questions <= math.factorial(len(self.function_list))
@@ -71,14 +71,13 @@ class function_composition(object):
 		for k in range(num_questions):
 
 			while True:
-				ans_list = self.__rand_pick_func(num_functions, num_functions > len(self.function_list))
+				ans_list = self.__rand_pick_func(num_functions)
 				ans_func_str = self.func_str(ans_list) # e.g. F(H(x))
 				if ans_func_str not in generated_ans_set:
 					generated_ans_set.add(ans_func_str)
 					break
 			existing_fn = set()
 
-			
 			existing_fn.add(ans_func_str)
 
 			choices = [None] * num_choices
@@ -118,7 +117,7 @@ class simple_func(object):
 	# operations that require paratheses when enclosed in another function
 	# 	e.g. if F(x) = x + 1, G(x) = x^2. Then F(G(x)) = (x + 1)^2 
 	#	where x + 1 needs to be enclosed in paratheses
-	__need_enclose_ops = ('+', '-', '^')
+	__need_enclose_ops = ('+', '-', '^', '/')
 
 	simple_ops = ('+', '-', '*', '/', '^', '%')
 
@@ -180,10 +179,27 @@ class file_writer(object):
 	bool body_only=False: do not include html <html>, <heads>, etc headers in output 
 	"""
 
-	template_start = '<html><head><script type="">'
-	template_js=	'var form = document.querySelector("form");var log = document.querySelector("#log"); form.addEventListener("submit", function(event) {var data = new FormData(form); var output = "";for (const entry of data) {output = output + entry[0] + "=" + entry[1] + "\r"};log.innerText = output;event.preventDefault();}, false)</script></head><body>'
+	template_start = r'''
+	<html>
+	<head>
+	<script type="">'''
+	template_js = r'''
+		var form = document.querySelector("form");
+		var log = document.querySelector("#log"); 
+		form.addEventListener("submit", function(event) {
+			var data = new FormData(form); 
+			var output = "";
+			for (const entry of data) {
+				output = output + entry[0] + "=" + entry[1] + "\r"
+			};
+			log.innerText = output;
+			event.preventDefault();
+		}, false)</script>
+	</head>
+	<body>
+	'''
 	
-	template_body = '''\
+	template_body = r'''
 		<p>If we were given {0} functions: </p>
 		<p style="text-align: center"> {1} </p> 
 		<p>... and you wanted to calculate:</p>
@@ -191,7 +207,7 @@ class file_writer(object):
 		<p>...how would you compose the functions to get that? (select ONE)</p>
 	'''
 
-	template_form =	'''\
+	template_form =	r'''
 		<form>
 		<div>
 			<input type="radio" id="funcComp1" name="funcComp" value="a">
@@ -207,10 +223,17 @@ class file_writer(object):
 		</div>
 		</form>
 	'''
-	template_submit = '<pre id="log"></pre><button>Submit</button>'
-	hr = '<hr>'
+	template_submit = r'''
+		<pre id="log"></pre>
+		<button>Submit</button>'''
+	hr = r'''
+		<hr>
+	'''
 
-	template_end = '</body></html>\n'
+	template_end = r'''
+	</body>
+	</html>
+	'''
 
 	def __init__(self, file, fn_comp, num_functions, num_choices, num_questions=1, body_only=False):
 		self.file = file
@@ -237,7 +260,7 @@ class file_writer(object):
 			form = "<form><div>"
 			form += "".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="a"><label for="funcComp1">{function_composition.func_str(choices[j])}</label>' for j in range(len(choices))])
 			form += "</div></form>"
-			self.file.write(template_body)
 			self.file.write("".join([template_body, form, self.template_submit, self.hr]))
 		if not self.body_only:
 			self.file.write(self.template_end)
+			self.file.write("\n")
