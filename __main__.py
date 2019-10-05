@@ -13,11 +13,12 @@ all_functions = [simple_func(uppercase_alphabets[i], 'x', ops[i], r.randint(2, 9
 
 #------------------------ Flags ----------------------------
 def parse_args():
-    parser = argparse.ArgumentParser(description='Process function composition program')
+    parser = argparse.ArgumentParser(description='Process function composition program. Default output is stdout.')
     parser.add_argument('-o', "--out", metavar='', type=argparse.FileType('w+', encoding='UTF-8'), help='Path to file for output, create file if necessary. Default output is stdout.')
     parser.add_argument('-f', '--num_functions', metavar='', type=int, default=3, help=f'number of functions to have as answer, must be at least 1, at most {len(ops)}. Default 3')
     parser.add_argument('-c', '--num_choices', metavar='', type=int, default=5, help='number of choices to present to the user, 1 < num choice <= factorial(num functions). Default 5')
     parser.add_argument('-q', '--questions', metavar='', type=int, default=1, help='number of questions to generate in file, default is 1. Must be no greater than factorial(num functions)')
+    parser.add_argument('-b', '--body_only', action='store_true', help='output only the form and submit without the html headers')
     return parser.parse_args(), parser
 
 #------------------------ Main -----------------------------
@@ -34,7 +35,7 @@ def main():
     else:
         fp = sys.stdout
     composer = function_composition(all_functions)
-    writer = file_writer(fp, composer, args.num_functions, args.num_choices, args.questions)
+    writer = file_writer(fp, composer, args.num_functions, args.num_choices, args.questions, args.body_only)
     writer.dump()
     fp.close()
     exit(0)

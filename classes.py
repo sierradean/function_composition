@@ -180,59 +180,60 @@ class file_writer(object):
 	"""
 
 	template_start = r'''
-	<html>
-	<head>
-	<script type="">'''
+<html>
+<head>
+<script type="">
+	'''
 	template_js = r'''
-		var form = document.querySelector("form");
-		var log = document.querySelector("#log"); 
-		form.addEventListener("submit", function(event) {
-			var data = new FormData(form); 
-			var output = "";
-			for (const entry of data) {
-				output = output + entry[0] + "=" + entry[1] + "\r"
-			};
-			log.innerText = output;
-			event.preventDefault();
-		}, false)</script>
-	</head>
-	<body>
+	var form = document.querySelector("form");
+	var log = document.querySelector("#log"); 
+	form.addEventListener("submit", function(event) {
+		var data = new FormData(form); 
+		var output = "";
+		for (const entry of data) {
+			output = output + entry[0] + "=" + entry[1] + "\r"
+		};
+		log.innerText = output;
+		event.preventDefault();
+	}, false)</script>
+</head>
+<body>
 	'''
 	
 	template_body = r'''
-		<p>If we were given {0} functions: </p>
-		<p style="text-align: center"> {1} </p> 
-		<p>... and you wanted to calculate:</p>
-		<p style="text-align: center"> {2} </p> 
-		<p>...how would you compose the functions to get that? (select ONE)</p>
+	<p>If we were given {0} functions: </p>
+	<p style="text-align: center"> {1} </p> 
+	<p>... and you wanted to calculate:</p>
+	<p style="text-align: center"> {2} </p> 
+	<p>...how would you compose the functions to get that? (select ONE)</p>
 	'''
 
 	template_form =	r'''
-		<form>
-		<div>
-			<input type="radio" id="funcComp1" name="funcComp" value="a">
-			<label for="funcComp1">{0}</label>
-			<input type="radio" id="funcComp2" name="funcComp" value="b">
-			<label for="funcComp2">{1}</label>
-			<input type="radio" id="funcComp3" name="funcComp" value="c">
-			<label for="funcComp3">{2}</label>
-			<input type="radio" id="funcComp4" name="funcComp" value="d">
-			<label for="funcComp4">{3}</label>
-			<input type="radio" id="funcComp5" name="funcComp" value="e">
-			<label for="funcComp5">{4}</label>
-		</div>
-		</form>
+	<form>
+	<div>
+		<input type="radio" id="funcComp1" name="funcComp" value="a">
+		<label for="funcComp1">{0}</label>
+		<input type="radio" id="funcComp2" name="funcComp" value="b">
+		<label for="funcComp2">{1}</label>
+		<input type="radio" id="funcComp3" name="funcComp" value="c">
+		<label for="funcComp3">{2}</label>
+		<input type="radio" id="funcComp4" name="funcComp" value="d">
+		<label for="funcComp4">{3}</label>
+		<input type="radio" id="funcComp5" name="funcComp" value="e">
+		<label for="funcComp5">{4}</label>
+	</div>
+	</form>
 	'''
 	template_submit = r'''
-		<pre id="log"></pre>
-		<button>Submit</button>'''
-	hr = r'''
-		<hr>
+	<pre id="log"></pre>
+	<button>Submit</button>
 	'''
-
+	hr = r'''
+	<hr>
+	'''
 	template_end = r'''
-	</body>
-	</html>
+</body>
+</html>
 	'''
 
 	def __init__(self, file, fn_comp, num_functions, num_choices, num_questions=1, body_only=False):
@@ -263,4 +264,4 @@ class file_writer(object):
 			self.file.write("".join([template_body, form, self.template_submit, self.hr]))
 		if not self.body_only:
 			self.file.write(self.template_end)
-			self.file.write("\n")
+		self.file.write("\n")
