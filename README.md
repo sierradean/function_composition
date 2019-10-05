@@ -58,7 +58,8 @@ optional arguments:
                         least 1, at most 6. Default 3
   -c , --num_choices    number of choices to present to the user, 1 < num
                         choice <= factorial(num functions). Default 5
-  -q , --questions      number of questions to generate in file, default is 1.
+  -q , --num_questions
+                        number of questions to generate in file, default is 1.
                         Must be no greater than factorial(num functions)
   -b, --body_only       output only the form and submit without the html
                         headers
