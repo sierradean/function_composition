@@ -29,7 +29,7 @@ Autoquiz component to generate questions like #8 on CS10 Fall 2018 [Quest](http:
 To get project code, first clone the project directory:
 
 ```shell
-git clone git@github.com:sierradean/function_composition.git
+git clone https://github.com/sierradean/function_composition.git
 ```
 
 The project will be saved under `function_composition` directory. Since this project is written to be a python module, one can run the directory with python directly.
