@@ -1,5 +1,7 @@
 import random
 import math
+import os
+import sys
 from string import Template
 
 #right now this always assumes there will be one exponential and  two linear  fns
@@ -85,11 +87,11 @@ template_submit = '<pre id="log"></pre><button>Submit</button>'
 template_end = '</body></html>'
 
 #calls create_sols
-sols = create_solns(ordered_fns)
+# sols = create_solns(ordered_fns)
 
 #writes all the html to an external HTML file that can then be opened to view in browser
 #subsitutes all py values into templates given above as well
-html_file.writelines( [template_start, template_js, template_body.format(blank_1, substitue(ordered_fns)), template_form.format(sols[0], sols[1], sols[2], sols[3], sols[4]), template_submit,template_end] )
+# html_file.writelines( [template_start, template_js, template_body.format(blank_1, substitue(ordered_fns)), template_form.format(sols[0], sols[1], sols[2], sols[3], sols[4]), template_submit,template_end] )
 
 
 
