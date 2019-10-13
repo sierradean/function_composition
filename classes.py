@@ -258,9 +258,15 @@ class file_writer(object):
 			random.shuffle(ans_list_copy)
 			fn_body = ", ".join([f.function_str_expr_html for f in ans_list_copy])
 			template_body = self.template_body.format(self.num_functions, fn_body, function_composition.func_expression_str(ans_list))
-			form = "<form><div>"
-			form += "".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="a"><label for="funcComp1">{function_composition.func_str(choices[j])}</label>' for j in range(len(choices))])
-			form += "</div></form>"
+			form = r'''
+	<form>
+	<div>
+'''
+			form += "\n".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="{j+1}"><label for="funcComp{j+1}">{function_composition.func_str(choices[j])}</label>' for j in range(len(choices))])
+			form += r'''
+	</div>
+	</form>
+'''
 			self.file.write("".join([template_body, form, self.template_submit, self.hr]))
 		if not self.body_only:
 			self.file.write(self.template_end)
