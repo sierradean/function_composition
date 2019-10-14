@@ -26,7 +26,7 @@ Autoquiz component to generate questions like #8 on CS10 Fall 2018 [Quest](http:
 
 - Python 3.6^
 
-To get project code, first clone the project directory:
+To get project code, either get the latest [RELEASE](https://github.com/sierradean/function_composition/releases) or clone the project directory:
 
 ```shell
 git clone https://github.com/sierradean/function_composition.git
