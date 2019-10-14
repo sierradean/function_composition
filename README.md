@@ -24,7 +24,7 @@ Autoquiz component to generate questions like #8 on CS10 Fall 2018 [Quest](http:
 
 ### Software Requirement
 
-- Python 3
+- Python 3.6^
 
 To get project code, first clone the project directory:
 

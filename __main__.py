@@ -2,12 +2,11 @@ import sys, os, math, string
 import os.path as path
 import random as r
 import argparse
-import textwrap
 
 from classes import *
 
 #------------------------ Functions ------------------------
-ops = simple_func.simple_ops
+ops = tuple(simple_func.simple_ops.keys())
 uppercase_alphabets = r.sample(list(string.ascii_uppercase), k=len(ops))
 all_functions = [simple_func(uppercase_alphabets[i], 'x', ops[i], r.randint(2, 9)) for i in range(len(ops))]
 
@@ -42,12 +41,12 @@ def main():
     exit(0)
 
 def help_and_exit(parser, code=2):
-    s = '''\
-        ----------------------
-        Invalid Input Occurred
-        ----------------------
+    s = r'''
+----------------------
+Invalid Input Occurred
+----------------------
     '''
-    print(textwrap.dedent(s))
+    print(s)
     parser.print_help()
     exit(code)
 

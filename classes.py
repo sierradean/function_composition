@@ -2,6 +2,7 @@ import random
 import math
 import os
 import sys
+import textwrap
 
 class function_composition(object):
 	"""
@@ -117,9 +118,15 @@ class simple_func(object):
 	# operations that require paratheses when enclosed in another function
 	# 	e.g. if F(x) = x + 1, G(x) = x^2. Then F(G(x)) = (x + 1)^2 
 	#	where x + 1 needs to be enclosed in paratheses
-	__need_enclose_ops = ('+', '-', '^', '/')
+	__need_enclose_ops = ('+', '-', '/', '%')
 
-	simple_ops = ('+', '-', '*', '/', '^', '%')
+	simple_ops = {	'+' : r' + ', 
+					'-' : r' - ', 
+					'*' : r' \times ', 
+					'/' : r' \div ', 
+					'^' : r'^', 
+					'%' : r' \% '
+				}
 
 	def __init__(self, name, arg_name, operation, number):
 		self.name = name
@@ -129,17 +136,16 @@ class simple_func(object):
 		self.need_enclosure = self.operation in self.__need_enclose_ops
 		self.function_str = f"{self.name}({self.arg_name})"
 		self.function_expr = self.concat_expr(arg_name)
-		self.function_str_expr_html = f"<strong>{self.function_str} = {self.function_expr}</strong>"
+		# for convenience, violating abstraction a bit
+		self.function_str_expr_html = f"<strong>$${self.function_str} = {self.function_expr}$$</strong>"
 		
-	def concat_str(self, param, html=False):
-		if html:
-			return f"<strong>{self.name}({param})</strong>"
+	def concat_str(self, param):
 		return f"{self.name}({param})"
 
 
 	def concat_expr(self, nested_expr):
-		if self.operation in self.simple_ops:
-			return f"{nested_expr} {self.operation} {self.number}"
+		if self.operation in self.simple_ops.keys():
+			return f"{nested_expr}{self.simple_ops[self.operation]}{self.number}"
 		elif self.number is None and nested_expr is None:
 			return f"{self.operation}()"
 		elif self.number is None:
@@ -182,20 +188,6 @@ class file_writer(object):
 	template_start = r'''
 <html>
 <head>
-<script type="">
-	'''
-	template_js = r'''
-	var form = document.querySelector("form");
-	var log = document.querySelector("#log"); 
-	form.addEventListener("submit", function(event) {
-		var data = new FormData(form); 
-		var output = "";
-		for (const entry of data) {
-			output = output + entry[0] + "=" + entry[1] + "\r"
-		};
-		log.innerText = output;
-		event.preventDefault();
-	}, false)</script>
 </head>
 <body>
 	'''
@@ -208,7 +200,7 @@ class file_writer(object):
 	<p>...how would you compose the functions to get that? (select ONE)</p>
 	'''
 
-	template_form =	r'''
+	__unused_template_form = r'''
 	<form>
 	<div>
 		<input type="radio" id="funcComp1" name="funcComp" value="a">
@@ -227,9 +219,25 @@ class file_writer(object):
 	template_submit = r'''
 	<pre id="log"></pre>
 	<button>Submit</button>
+	<script type="text/javascript">
+		var form = document.querySelector("form");
+		var log = document.querySelector("#log"); 
+		form.addEventListener("submit", function(event) {
+			var data = new FormData(form); 
+			var output = "";
+			for (const entry of data) {
+				output = output + entry[0] + "=" + entry[1] + "\r"
+			};
+			log.innerText = output;
+			event.preventDefault();
+		}, false)
+	</script>
 	'''
-	hr = r'''
+	hr = rf'''
 	<hr>
+	<script id="MathJax-script" async 
+		src="{os.path.dirname(os.path.realpath(__file__))}/assets/packages/MathJax-master/es5/tex-chtml.js">
+	</script>
 	'''
 	template_end = r'''
 </body>
@@ -250,24 +258,18 @@ class file_writer(object):
 		"""
 		if not self.body_only:
 			self.file.write(self.template_start)
-			self.file.write(self.template_js)
+
 		generated_questions = self.fn_comp.generate(self.num_functions, self.num_choices, self.num_questions)
+		
 		for i in range(len(generated_questions)):
 			ans_list, ans_pos, choices = generated_questions[i]
-			ans_list_copy = ans_list[:]
-			random.shuffle(ans_list_copy)
-			fn_body = ", ".join([f.function_str_expr_html for f in ans_list_copy])
-			template_body = self.template_body.format(self.num_functions, fn_body, function_composition.func_expression_str(ans_list))
-			form = r'''
-	<form>
-	<div>
-'''
-			form += "\n".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="{j+1}"><label for="funcComp{j+1}">{function_composition.func_str(choices[j])}</label>' for j in range(len(choices))])
-			form += r'''
-	</div>
-	</form>
-'''
+			fn_body = " ".join([f.function_str_expr_html for f in ans_list])
+			template_body = self.template_body.format(self.num_functions, fn_body, f"$${function_composition.func_expression_str(ans_list)}$$")
+			form = textwrap.indent('<form>\n<div>', '\n')
+			form += "\n".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="{j+1}"><label for="funcComp{j+1}">\({function_composition.func_str(choices[j])}\)</label>' for j in range(len(choices))])
+			form += textwrap.indent('</div>\n</form>', '\n')
 			self.file.write("".join([template_body, form, self.template_submit, self.hr]))
+
 		if not self.body_only:
 			self.file.write(self.template_end)
 		self.file.write("\n")
