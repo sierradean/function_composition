@@ -203,9 +203,10 @@ class file_writer(object):
 	hr = rf'''
 	<hr>
 	'''
+	# extra function_composition path: os.path.dirname(os.path.realpath(__file__))
 	mathjax = r'''
 	<script id="MathJax-script" async 
-		src="{os.path.dirname(os.path.realpath(__file__))}/assets/packages/MathJax-master/es5/tex-chtml.js">
+		src="./packages/MathJax-master/es5/tex-chtml.js">
 	</script>
 	'''
 	mathjax_online = r'''
@@ -213,15 +214,17 @@ class file_writer(object):
 	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 	'''
 
+	bootstrap = r'''
+	<link rel="stylesheet" href="./packages/bootstrap-4.3.1-dist/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="./packages/bootstrap-4.3.1-dist/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"></script>
+	'''
+
 	bootstrap_online = r'''
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
 		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-		crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-		crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
 		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
 		crossorigin="anonymous"></script>
@@ -266,10 +269,7 @@ class file_writer(object):
 					</label>
 				</div>
 			</div>
-			'''
-			for j in range(len(choices))])
-			# form += "\n".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="{j+1}"><label for="funcComp{j+1}">\({function_composition.func_str(choices[j])}\)</label>' for j in range(len(choices))])
-			
+			'''for j in range(len(choices))])
 			form += textwrap.indent('</div>\n</div>', '\n')
 			self.file.write("".join([template_body, form, self.hr]))
 
@@ -278,6 +278,7 @@ class file_writer(object):
 			self.file.write(self.bootstrap_online)
 			self.file.write(self.mathjax_online)
 		else:
+			self.file.write(self.bootstrap)
 			self.file.write(self.mathjax)
 
 		if not self.body_only:
