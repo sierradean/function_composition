@@ -251,7 +251,9 @@ class file_writer(object):
 		
 		for i in range(len(generated_questions)):
 			ans_list, ans_pos, choices = generated_questions[i]
-			fn_body = " ".join([f"$${f.function_str_expr}$$" for f in ans_list])
+			display_fn = ans_list[:]
+			random.shuffle(display_fn)
+			fn_body = " ".join([f"$${f.function_str_expr}$$" for f in display_fn])
 			template_body = self.template_body.format(self.num_functions, fn_body, f"$${function_composition.func_expression_str(ans_list)}$$")
 			form = textwrap.indent('''<div class="container-fluid">\n<div class="row mx-5">''', '\n')
 
