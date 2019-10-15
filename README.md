@@ -4,6 +4,10 @@ Autoquiz component to generate questions like #8 on CS10 Fall 2018 [Quest](http:
 
 ![Question Example](assets/images/example_question.png)
 
+Screenshot of an example output:
+
+![Example Output](assets/images/example_output.png)
+
 ## Contributors
 
 - [Sierra Dean](https://github.com/sierradean)
