@@ -36,7 +36,7 @@ class function_composition(object):
 		"""
 		so_far = fn_list[-1].function_expr
 		for i in range(len(fn_list) - 2, -1, -1):
-			if fn_list[i + 1].need_enclosure:
+			if fn_list[i].enclose_inner:
 				so_far = f"({so_far})"
 			so_far = fn_list[i].concat_expr(so_far)
 		return so_far
@@ -117,7 +117,7 @@ class simple_func(object):
 	# operations that require paratheses when enclosed in another function
 	# 	e.g. if F(x) = x + 1, G(x) = x^2. Then F(G(x)) = (x + 1)^2 
 	#	where x + 1 needs to be enclosed in paratheses
-	__need_enclose_ops = ('+', '-', '/', '%')
+	__enclose_inner = ('*', '/', '^', '%')
 
 	simple_ops = {	'+' : r' + ', 
 					'-' : r' - ', 
@@ -132,7 +132,7 @@ class simple_func(object):
 		self.arg_name = arg_name
 		self.operation = operation
 		self.number = number 
-		self.need_enclosure = self.operation in self.__need_enclose_ops
+		self.enclose_inner = self.operation in self.__enclose_inner
 		self.function_str = f"{self.name}({self.arg_name})"
 		self.function_expr = self.concat_expr(arg_name)
 		# for convenience, violating abstraction a bit
@@ -156,7 +156,7 @@ class simple_func(object):
 
 
 	def concat_fn(self, nest_fn):
-		if nest_fn.need_enclosure:
+		if self.enclose_inner:
 			new_arg = f"({nest_fn.function_expr})"
 		else:
 			new_arg = nest_fn.function_expr
