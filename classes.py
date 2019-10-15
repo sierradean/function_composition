@@ -1,7 +1,6 @@
 import random
 import math
 import os
-import sys
 import textwrap
 
 class function_composition(object):
@@ -215,11 +214,8 @@ class file_writer(object):
 	'''
 
 	bootstrap = r'''
-	<link rel="stylesheet" href="./packages/bootstrap-4.3.1-dist/css/bootstrap.min.css"
-		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	<script src="./packages/bootstrap-4.3.1-dist/js/bootstrap.min.js"
-		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-		crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="packages/bootstrap-4.3.1-dist/css/bootstrap.css">
+	<script src="packages/bootstrap-4.3.1-dist/js/bootstrap.js"></script>
 	'''
 
 	bootstrap_online = r'''
