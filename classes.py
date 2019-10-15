@@ -253,7 +253,7 @@ class file_writer(object):
 			ans_list, ans_pos, choices = generated_questions[i]
 			fn_body = " ".join([f"$${f.function_str_expr}$$" for f in ans_list])
 			template_body = self.template_body.format(self.num_functions, fn_body, f"$${function_composition.func_expression_str(ans_list)}$$")
-			form = textwrap.indent('''<div class="container">\n<div class="row mx-0">''', '\n')
+			form = textwrap.indent('''<div class="container-fluid">\n<div class="row mx-5">''', '\n')
 
 			form += "\n".join([rf'''
 			<div class="col py-2 border border-dark">
