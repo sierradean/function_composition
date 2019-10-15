@@ -1,7 +1,6 @@
 import random
 import math
 import os
-import sys
 import textwrap
 
 class function_composition(object):
@@ -37,7 +36,7 @@ class function_composition(object):
 		"""
 		so_far = fn_list[-1].function_expr
 		for i in range(len(fn_list) - 2, -1, -1):
-			if fn_list[i + 1].need_enclosure:
+			if fn_list[i].enclose_inner:
 				so_far = f"({so_far})"
 			so_far = fn_list[i].concat_expr(so_far)
 		return so_far
@@ -118,7 +117,7 @@ class simple_func(object):
 	# operations that require paratheses when enclosed in another function
 	# 	e.g. if F(x) = x + 1, G(x) = x^2. Then F(G(x)) = (x + 1)^2 
 	#	where x + 1 needs to be enclosed in paratheses
-	__need_enclose_ops = ('+', '-', '/', '%')
+	__enclose_inner = ('*', '/', '^', '%')
 
 	simple_ops = {	'+' : r' + ', 
 					'-' : r' - ', 
@@ -133,11 +132,11 @@ class simple_func(object):
 		self.arg_name = arg_name
 		self.operation = operation
 		self.number = number 
-		self.need_enclosure = self.operation in self.__need_enclose_ops
+		self.enclose_inner = self.operation in self.__enclose_inner
 		self.function_str = f"{self.name}({self.arg_name})"
 		self.function_expr = self.concat_expr(arg_name)
 		# for convenience, violating abstraction a bit
-		self.function_str_expr_html = f"<strong>$${self.function_str} = {self.function_expr}$$</strong>"
+		self.function_str_expr = f"{self.function_str} = {self.function_expr}"
 		
 	def concat_str(self, param):
 		return f"{self.name}({param})"
@@ -157,7 +156,7 @@ class simple_func(object):
 
 
 	def concat_fn(self, nest_fn):
-		if nest_fn.need_enclosure:
+		if self.enclose_inner:
 			new_arg = f"({nest_fn.function_expr})"
 		else:
 			new_arg = nest_fn.function_expr
@@ -193,64 +192,53 @@ class file_writer(object):
 	'''
 	
 	template_body = r'''
-	<p>If we were given {0} functions: </p>
-	<p style="text-align: center"> {1} </p> 
-	<p>... and you wanted to calculate:</p>
-	<p style="text-align: center"> {2} </p> 
-	<p>...how would you compose the functions to get that? (select ONE)</p>
+	<p class="mx-5 my-2 text-left font-weight-bold">If we were given {0} functions: </p>
+	<p class="text-center font-weight-bold">{1}</p> 
+	<p class="mx-5 my-2 text-left font-weight-bold">... and you wanted to calculate:</p>
+	<p class="text-center font-weight-bold">{2}</p> 
+	<p class="mx-5 my-2 text-left font-weight-bold">...how would you compose the functions to get that? (select ONE)</p>
 	'''
 
-	__unused_template_form = r'''
-	<form>
-	<div>
-		<input type="radio" id="funcComp1" name="funcComp" value="a">
-		<label for="funcComp1">{0}</label>
-		<input type="radio" id="funcComp2" name="funcComp" value="b">
-		<label for="funcComp2">{1}</label>
-		<input type="radio" id="funcComp3" name="funcComp" value="c">
-		<label for="funcComp3">{2}</label>
-		<input type="radio" id="funcComp4" name="funcComp" value="d">
-		<label for="funcComp4">{3}</label>
-		<input type="radio" id="funcComp5" name="funcComp" value="e">
-		<label for="funcComp5">{4}</label>
-	</div>
-	</form>
-	'''
-	template_submit = r'''
-	<pre id="log"></pre>
-	<button>Submit</button>
-	<script type="text/javascript">
-		var form = document.querySelector("form");
-		var log = document.querySelector("#log"); 
-		form.addEventListener("submit", function(event) {
-			var data = new FormData(form); 
-			var output = "";
-			for (const entry of data) {
-				output = output + entry[0] + "=" + entry[1] + "\r"
-			};
-			log.innerText = output;
-			event.preventDefault();
-		}, false)
-	</script>
-	'''
 	hr = rf'''
 	<hr>
+	'''
+	# extra function_composition path: os.path.dirname(os.path.realpath(__file__))
+	mathjax = r'''
 	<script id="MathJax-script" async 
-		src="{os.path.dirname(os.path.realpath(__file__))}/assets/packages/MathJax-master/es5/tex-chtml.js">
+		src="./packages/MathJax-master/es5/tex-chtml.js">
 	</script>
 	'''
+	mathjax_online = r'''
+	<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+	'''
+
+	bootstrap = r'''
+	<link rel="stylesheet" href="packages/bootstrap-4.3.1-dist/css/bootstrap.css">
+	<script src="packages/bootstrap-4.3.1-dist/js/bootstrap.js"></script>
+	'''
+
+	bootstrap_online = r'''
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"></script>
+	'''
+
 	template_end = r'''
 </body>
 </html>
 	'''
 
-	def __init__(self, file, fn_comp, num_functions, num_choices, num_questions=1, body_only=False):
+	def __init__(self, file, fn_comp, num_functions, num_choices, num_questions=1, body_only=False, is_web=False):
 		self.file = file
 		self.fn_comp = fn_comp
 		self.num_functions = num_functions
 		self.num_choices = num_choices
 		self.num_questions = num_questions
 		self.body_only = body_only
+		self.is_web = is_web
 
 	def dump(self):
 		"""
@@ -263,12 +251,33 @@ class file_writer(object):
 		
 		for i in range(len(generated_questions)):
 			ans_list, ans_pos, choices = generated_questions[i]
-			fn_body = " ".join([f.function_str_expr_html for f in ans_list])
+			display_fn = ans_list[:]
+			random.shuffle(display_fn)
+			fn_body = " ".join([f"$${f.function_str_expr}$$" for f in display_fn])
 			template_body = self.template_body.format(self.num_functions, fn_body, f"$${function_composition.func_expression_str(ans_list)}$$")
-			form = textwrap.indent('<form>\n<div>', '\n')
-			form += "\n".join([f'<input type="radio" id="funcComp{j+1}" name="funcComp" value="{j+1}"><label for="funcComp{j+1}">\({function_composition.func_str(choices[j])}\)</label>' for j in range(len(choices))])
-			form += textwrap.indent('</div>\n</form>', '\n')
-			self.file.write("".join([template_body, form, self.template_submit, self.hr]))
+			form = textwrap.indent('''<div class="container-fluid">\n<div class="row mx-5">''', '\n')
+
+			form += "\n".join([rf'''
+			<div class="col py-2 border border-dark">
+				<div class="form-check form-check-inline">
+					<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+						value="option1">
+					<label class="form-check-label" for="inlineRadio1">
+							\({function_composition.func_str(choices[j])}\)
+					</label>
+				</div>
+			</div>
+			'''for j in range(len(choices))])
+			form += textwrap.indent('</div>\n</div>', '\n')
+			self.file.write("".join([template_body, form, self.hr]))
+
+		# script tags
+		if self.is_web:
+			self.file.write(self.bootstrap_online)
+			self.file.write(self.mathjax_online)
+		else:
+			self.file.write(self.bootstrap)
+			self.file.write(self.mathjax)
 
 		if not self.body_only:
 			self.file.write(self.template_end)
