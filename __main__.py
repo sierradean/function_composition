@@ -58,6 +58,7 @@ def main():
 
 def help_and_exit(parser, code=2):
     s = r'''
+    
 ----------------------
 Invalid Input Occurred
 ----------------------

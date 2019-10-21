@@ -112,6 +112,8 @@ class simple_func(object):
 	string operation: a single operation e.g. '+', '-', '*', '^' etc
 
 	int/float number: a single number, either integer or float
+
+	bool flip_order: flipping variable and number e.g 5 + x instead of x + 5
 	"""
 
 	# operations that require paratheses when enclosed in another function
@@ -119,15 +121,16 @@ class simple_func(object):
 	#	where x + 1 needs to be enclosed in paratheses
 	__enclose_inner = ('*', '/', '^', '%')
 
-	simple_ops = {	'+' : r' + ', 
-					'-' : r' - ', 
-					'*' : r' \times ', 
-					'/' : r' \div ', 
-					'^' : r'^', 
-					'%' : r' \% '
-				}
+	# function mapped to (Tex, flip-able)
+	simple_ops = {
+            '+': (r'({} + {})', True),
+            '-': (r'({} - {})', True),
+            '*': (r'({} \times {})', True),
+            '/': (r'\frac{}{}', True),
+            '^': (r'{}^{}', False)
+        }
 
-	def __init__(self, name, arg_name, operation, number):
+	def __init__(self, name, arg_name, operation, number, flip_order=False):
 		self.name = name
 		self.arg_name = arg_name
 		self.operation = operation
@@ -135,16 +138,30 @@ class simple_func(object):
 		self.enclose_inner = self.operation in self.__enclose_inner
 		self.function_str = f"{self.name}({self.arg_name})"
 		self.function_expr = self.concat_expr(arg_name)
-		# for convenience, violating abstraction a bit
 		self.function_str_expr = f"{self.function_str} = {self.function_expr}"
-		
+		self.__flip_order = flip_order
+
 	def concat_str(self, param):
+		"""
+		string param: function signature 
+
+		Returns:
+		A new function signature that might look like F(G(x))
+		"""
 		return f"{self.name}({param})"
 
 
 	def concat_expr(self, nested_expr):
+		"""
+		string nested_expr: nested_expr in place of argument
+
+		Returns:
+		A string for function expression e.g. x + 5
+		"""
 		if self.operation in self.simple_ops.keys():
-			return f"{nested_expr}{self.simple_ops[self.operation]}{self.number}"
+			if self.__flip_order and self.simple_ops[self.operation][1]:
+				return self.simple_ops[self.operation][0].format(self.number, nested_expr)
+			return self.simple_ops[self.operation][0].format(nested_expr, self.number)
 		elif self.number is None and nested_expr is None:
 			return f"{self.operation}()"
 		elif self.number is None:
@@ -155,7 +172,7 @@ class simple_func(object):
 			raise RuntimeError("simple_func class does not support complex functions")
 
 
-	def concat_fn(self, nest_fn):
+	def __unused_concat_fn(self, nest_fn):
 		if self.enclose_inner:
 			new_arg = f"({nest_fn.function_expr})"
 		else:
@@ -163,8 +180,11 @@ class simple_func(object):
 		return self.concat_expr(new_arg)
 
 	def __repr__(self):
-	 return f"{self.function_str} = {self.function_expr}"
+		return f"<class 'simple_func' {self.function_str_expr}>"
 
+	def __str__(self):
+		return self.function_str_expr
+			
 class file_writer(object):
 	"""
 	Summary:
@@ -260,9 +280,9 @@ class file_writer(object):
 			form += "\n".join([rf'''
 			<div class="col py-2 border border-dark">
 				<div class="form-check form-check-inline">
-					<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
-						value="option1">
-					<label class="form-check-label" for="inlineRadio1">
+					<input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio{j}"
+						value="{j}">
+					<label class="form-check-label" for="inlineRadio{j}">
 							\({function_composition.func_str(choices[j])}\)
 					</label>
 				</div>
