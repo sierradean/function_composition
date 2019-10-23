@@ -119,15 +119,16 @@ class simple_func(object):
 	# operations that require paratheses when enclosed in another function
 	# 	e.g. if F(x) = x + 1, G(x) = x^2. Then F(G(x)) = (x + 1)^2 
 	#	where x + 1 needs to be enclosed in paratheses
-	__enclose_inner = ('*', '/', '^', '%')
+	__enclose_inner = ('*', '^')
 
 	# function mapped to (Tex, flip-able)
 	simple_ops = {
-            '+': (r'({} + {})', True),
-            '-': (r'({} - {})', True),
-            '*': (r'({} \times {})', True),
-            '/': (r'\frac{}{}', True),
-            '^': (r'{}^{}', False)
+            '+': (r'{} + {}', True),
+            '-': (r'{} - {}', True),
+            '*': (r'{} \times {}', True),
+            '/': (r'\frac{{0}}{{1}}', True),
+            '^': (r'{}^{}', False),
+			'sqrt': (r'\sqrt[{0}]{{1}}', False)
         }
 
 	def __init__(self, name, arg_name, operation, number, flip_order=False):
