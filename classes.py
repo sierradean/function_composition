@@ -68,7 +68,7 @@ class function_composition(object):
 
 		all_questions = []
 
-		for k in range(num_questions):
+		for _ in range(num_questions):
 
 			while True:
 				ans_list = self.__rand_pick_func(num_functions)
@@ -121,14 +121,13 @@ class simple_func(object):
 	#	where x + 1 needs to be enclosed in paratheses
 	__enclose_inner = ('*', '^')
 
-	# function mapped to (Tex, flip-able)
 	simple_ops = {
-            '+': (r'{} + {}', True),
-            '-': (r'{} - {}', True),
-            '*': (r'{} \times {}', True),
-            '/': (r'\frac{{0}}{{1}}', True),
-            '^': (r'{}^{}', False),
-			'sqrt': (r'\sqrt[{0}]{{1}}', False)
+            '+': single_op('+', r'{} + {}', True),
+            '-': single_op('-', r'{} - {}', True),
+            '*': single_op('*', r'{} \times {}', True),
+            '/': single_op('/', r'\frac{{0}}{{1}}', True),
+            '^': single_op('^', r'{}^{}', False),
+			'sqrt': single_op('sqrt', r'\sqrt[{0}]{{1}}', False)
         }
 
 	def __init__(self, name, arg_name, operation, number, flip_order=False):
@@ -151,8 +150,7 @@ class simple_func(object):
 		"""
 		return f"{self.name}({param})"
 
-
-	def concat_expr(self, nested_expr):
+	def concat_expr(self, nested_expr, tex=True):
 		"""
 		string nested_expr: nested_expr in place of argument
 
@@ -160,9 +158,10 @@ class simple_func(object):
 		A string for function expression e.g. x + 5
 		"""
 		if self.operation in self.simple_ops.keys():
-			if self.__flip_order and self.simple_ops[self.operation][1]:
-				return self.simple_ops[self.operation][0].format(self.number, nested_expr)
-			return self.simple_ops[self.operation][0].format(nested_expr, self.number)
+			# operation is something we know how to work with
+			if self.__flip_order and self.simple_ops[self.operation].flipable:
+				return self.simple_ops[self.operation].to_string(self.number, nested_expr, tex)
+			return self.simple_ops[self.operation].to_string(nested_expr, self.number, tex)
 		elif self.number is None and nested_expr is None:
 			return f"{self.operation}()"
 		elif self.number is None:
@@ -172,20 +171,32 @@ class simple_func(object):
 		else:
 			raise RuntimeError("simple_func class does not support complex functions")
 
-
-	def __unused_concat_fn(self, nest_fn):
-		if self.enclose_inner:
-			new_arg = f"({nest_fn.function_expr})"
-		else:
-			new_arg = nest_fn.function_expr
-		return self.concat_expr(new_arg)
-
 	def __repr__(self):
 		return f"<class 'simple_func' {self.function_str_expr}>"
 
 	def __str__(self):
 		return self.function_str_expr
-			
+
+class single_op(object):
+	"""
+	single_op is a structure that contains information about 
+		a single mathematical operation
+	"""
+	def __init__(self, op, tex, flipable):
+		"""
+		op: operation e.g. +, -, * etc
+		tex: LaTex representation
+		flipable: whether can flip arguments to operation
+		"""
+		self.op = op
+		self.tex = tex
+		self.flipable = flipable
+
+	def to_string(self, exp1, exp2, tex):
+		if tex:
+			return self.tex.format(exp1, exp2)
+		return f"{exp1} {op} {exp2}"	
+
 class file_writer(object):
 	"""
 	Summary:

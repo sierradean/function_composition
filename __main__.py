@@ -11,7 +11,7 @@ from classes import *
 default_err_code = 2
 ops = tuple(simple_func.simple_ops.keys())
 uppercase_alphabets = r.sample(list(string.ascii_uppercase), k=len(ops))
-all_functions = [simple_func(uppercase_alphabets[i], 'x', ops[i], r.randint(2, 9)) for i in range(len(ops))]
+all_functions = [simple_func(uppercase_alphabets[i], 'x', ops[i], r.randint(2, 9), bool(r.randint(0, 1))) for i in range(len(ops))]
 
 #------------------------ Flags ----------------------------
 def parse_args():
@@ -22,6 +22,7 @@ def parse_args():
     parser.add_argument('-q', '--num_questions', metavar='', type=int, default=1, help='number of questions to generate in file. Must be no greater than factorial(num functions). Default 1')
     parser.add_argument('-b', '--body_only', action='store_true', help='output only the form and submit without the html headers. Default False')
     parser.add_argument('-l', '--local', action='store_true', help='if flagged, will not fetch packages from CDN directly. Instead, required packages will be written in the same directory as file output within "packages/" directory(except for stdout). Default False.')
+    parser.add_argument('-i', '--inverse', action='store_true', help='if flagged, will generate inverse questions, which lets user choose the function composition given an expression')
     return parser.parse_args(), parser
 
 #------------------------ Main -----------------------------
