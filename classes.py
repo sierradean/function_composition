@@ -71,32 +71,59 @@ class function_composition(object):
 		for _ in range(num_questions):
 
 			while True:
+				# generating a unique answer 
 				ans_list = self.__rand_pick_func(num_functions)
 				ans_func_str = self.func_str(ans_list) # e.g. F(H(x))
 				if ans_func_str not in generated_ans_set:
 					generated_ans_set.add(ans_func_str)
 					break
-			existing_fn = set()
-
-			existing_fn.add(ans_func_str)
-
-			choices = [None] * num_choices
-			ans_pos = random.randint(0, num_choices - 1)
-			choices[ans_pos] = ans_list
 			
-			for i in range(0, num_choices):
-				if i != ans_pos:
-					while True:
-						c = ans_list[:]
-						random.shuffle(c)
-						c_str = self.func_str(c)
-						if c_str not in existing_fn:
-							choices[i] = c
-							existing_fn.add(c_str)
-							break
+			ans_pos, choices = self.generate_question_w_answer(ans_list, num_choices)
 
 			all_questions.append([ans_list, ans_pos, choices])
 		return all_questions
+
+	@staticmethod
+	def generate_question_w_answer(ans_list, num_choices):
+		existing_fn = set()
+		ans_func_str = function_composition.func_str(ans_list) # e.g. F(H(x))
+		existing_fn.add(ans_func_str)
+
+		choices = [None] * num_choices
+		ans_pos = random.randint(0, num_choices - 1)
+		choices[ans_pos] = ans_list
+		# fill in other choices
+		for i in range(0, num_choices):
+			if i != ans_pos:
+				while True:
+					c = ans_list[:]
+					random.shuffle(c)
+					c_str = function_composition.func_str(c)
+					if c_str not in existing_fn:
+						choices[i] = c
+						existing_fn.add(c_str)
+						break
+		return ans_pos, choices
+
+class single_op(object):
+	"""
+	single_op is a structure that contains information about 
+		a single mathematical operation
+	"""
+	def __init__(self, op, tex, flipable):
+		"""
+		op: operation e.g. +, -, * etc
+		tex: LaTex representation
+		flipable: whether can flip arguments to operation
+		"""
+		self.op = op
+		self.tex = tex
+		self.flipable = flipable
+
+	def to_string(self, exp1, exp2, tex_str):
+		if tex_str:
+			return self.tex.format(exp1, exp2)
+		return f"{exp1} {self.op} {exp2}"	
 
 
 class simple_func(object):
@@ -127,7 +154,7 @@ class simple_func(object):
             '*': single_op('*', r'{} \times {}', True),
             '/': single_op('/', r'\frac{{0}}{{1}}', True),
             '^': single_op('^', r'{}^{}', False),
-			'sqrt': single_op('sqrt', r'\sqrt[{0}]{{1}}', False)
+			'sqrt': single_op('sqrt', r'\sqrt[{1}]{{0}}', False)
         }
 
 	def __init__(self, name, arg_name, operation, number, flip_order=False):
@@ -135,11 +162,11 @@ class simple_func(object):
 		self.arg_name = arg_name
 		self.operation = operation
 		self.number = number 
+		self.__flip_order = flip_order
 		self.enclose_inner = self.operation in self.__enclose_inner
 		self.function_str = f"{self.name}({self.arg_name})"
 		self.function_expr = self.concat_expr(arg_name)
 		self.function_str_expr = f"{self.function_str} = {self.function_expr}"
-		self.__flip_order = flip_order
 
 	def concat_str(self, param):
 		"""
@@ -157,7 +184,7 @@ class simple_func(object):
 		Returns:
 		A string for function expression e.g. x + 5
 		"""
-		if self.operation in self.simple_ops.keys():
+		if self.operation in self.simple_ops:
 			# operation is something we know how to work with
 			if self.__flip_order and self.simple_ops[self.operation].flipable:
 				return self.simple_ops[self.operation].to_string(self.number, nested_expr, tex)
@@ -176,26 +203,6 @@ class simple_func(object):
 
 	def __str__(self):
 		return self.function_str_expr
-
-class single_op(object):
-	"""
-	single_op is a structure that contains information about 
-		a single mathematical operation
-	"""
-	def __init__(self, op, tex, flipable):
-		"""
-		op: operation e.g. +, -, * etc
-		tex: LaTex representation
-		flipable: whether can flip arguments to operation
-		"""
-		self.op = op
-		self.tex = tex
-		self.flipable = flipable
-
-	def to_string(self, exp1, exp2, tex):
-		if tex:
-			return self.tex.format(exp1, exp2)
-		return f"{exp1} {op} {exp2}"	
 
 class file_writer(object):
 	"""

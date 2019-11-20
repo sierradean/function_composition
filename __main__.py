@@ -10,8 +10,10 @@ from classes import *
 #------------------------ Functions ------------------------
 default_err_code = 2
 ops = tuple(simple_func.simple_ops.keys())
-uppercase_alphabets = r.sample(list(string.ascii_uppercase), k=len(ops))
-all_functions = [simple_func(uppercase_alphabets[i], 'x', ops[i], r.randint(2, 9), bool(r.randint(0, 1))) for i in range(len(ops))]
+
+def init_functions():
+    uppercase_alphabets = r.sample(list(string.ascii_uppercase), k=len(ops))
+    return [simple_func(uppercase_alphabets[i], 'x', ops[i], r.randint(2, 9), bool(r.randint(0, 1))) for i in range(len(ops))]
 
 #------------------------ Flags ----------------------------
 def parse_args():
@@ -28,7 +30,7 @@ def parse_args():
 #------------------------ Main -----------------------------
 def main():
     args, parser = parse_args()
-    
+    all_functions = init_functions()
     if args.num_functions < 1 or args.num_functions > len(ops) or \
     args.num_questions < 1 or args.num_questions > math.factorial(args.num_functions):
         help_and_exit(parser, default_err_code)
