@@ -150,11 +150,11 @@ class simple_func(object):
 
 	simple_ops = {
             '+': single_op('+', r'{} + {}', True),
-            '-': single_op('-', r'{} - {}', True),
+            '-': single_op('-', r'{} - {}', False),
             '*': single_op('*', r'{} \times {}', True),
-            '/': single_op('/', r'\frac{{0}}{{1}}', True),
+            '/': single_op('/', r'\frac{{{0}}}{{{1}}}', False),
             '^': single_op('^', r'{}^{}', False),
-			'sqrt': single_op('sqrt', r'\sqrt[{1}]{{0}}', False)
+			'sqrt': single_op('sqrt', r'\sqrt[{1}]{{{0}}}', False)
         }
 
 	def __init__(self, name, arg_name, operation, number, flip_order=False):
@@ -165,7 +165,7 @@ class simple_func(object):
 		self.__flip_order = flip_order
 		self.enclose_inner = self.operation in self.__enclose_inner
 		self.function_str = f"{self.name}({self.arg_name})"
-		self.function_expr = self.concat_expr(arg_name)
+		self.function_expr = self.concat_expr(arg_name, ignore_flip=True)
 		self.function_str_expr = f"{self.function_str} = {self.function_expr}"
 
 	def concat_str(self, param):
@@ -177,7 +177,7 @@ class simple_func(object):
 		"""
 		return f"{self.name}({param})"
 
-	def concat_expr(self, nested_expr, tex=True):
+	def concat_expr(self, nested_expr, ignore_flip=False, tex=True):
 		"""
 		string nested_expr: nested_expr in place of argument
 
@@ -186,7 +186,7 @@ class simple_func(object):
 		"""
 		if self.operation in self.simple_ops:
 			# operation is something we know how to work with
-			if self.__flip_order and self.simple_ops[self.operation].flipable:
+			if not ignore_flip and self.__flip_order and self.simple_ops[self.operation].flipable:
 				return self.simple_ops[self.operation].to_string(self.number, nested_expr, tex)
 			return self.simple_ops[self.operation].to_string(nested_expr, self.number, tex)
 		elif self.number is None and nested_expr is None:
